@@ -150,7 +150,7 @@ const logIn = catchAsyncError(async (req, res, next) => {
 })
 
 const logout = catchAsyncError(async (req, res, next) => {
-    const token = req.cookies.Edgy_TOKEN;
+    const token = req.cookies.Learnmate_TOKEN;
     if (!token) {
         return res.status(200).json({
             success: true,
@@ -158,7 +158,7 @@ const logout = catchAsyncError(async (req, res, next) => {
         });
     }
 
-    res.clearCookie('Edgy_TOKEN', {
+    res.clearCookie('Learnmate_TOKEN', {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
@@ -171,7 +171,7 @@ const logout = catchAsyncError(async (req, res, next) => {
 });
 
 const isAuthenticated = catchAsyncError(async (req, res, next) => {
-    const token = req.cookies.Edgy_TOKEN;
+    const token = req.cookies.Learnmate_TOKEN;
     if (!token) {
         return next(new ErrorHandling(401, "Please login to access this resource"));
     }

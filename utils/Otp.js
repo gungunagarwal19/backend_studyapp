@@ -17,13 +17,13 @@ const generateToken = () => {
 
 const sendOtpEmail = async (recipientEmail, otp) => {
 
-    SibApiV3Sdk.ApiClient.instance.authentications['api-key'].apiKey = process.env.EDGY_OTP;
+    SibApiV3Sdk.ApiClient.instance.authentications['api-key'].apiKey = process.env.Learnmate_OTP;
 
     const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
 
     const sender = {
         email: 'cipherstar500@gmail.com', 
-        name: 'Edgy'
+        name: 'Learnmate'
     };
 
     const receivers = [

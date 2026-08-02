@@ -10,7 +10,7 @@ const sendToken = (user, res, statusCode) => {
     };
 
     res.status(statusCode)
-        .cookie("Edgy_TOKEN", token, options)
+        .cookie("Learnmate_TOKEN", token, options)
         .json({
             success: true,
             user,

@@ -1,6 +1,6 @@
-# Edgy
+# Learnmate
 
-Edgy is a personal project designed to revolutionize how you organize, study, and interact with your learning materials. With Edgy, you can create custom sections, upload files, generate flashcards, enable spaced repetition, and even ask questions about your content—all in one place.
+Learnmate is a personal project designed to revolutionize how you organize, study, and interact with your learning materials. With Learnmate, you can create custom sections, upload files, generate flashcards, enable spaced repetition, and even ask questions about your content—all in one place.
 
 ## Features
 
@@ -9,7 +9,7 @@ Edgy is a personal project designed to revolutionize how you organize, study, an
 - **Upload Files:** Upload files (PDFs, docs, etc.) to any section at any time for flexible organization.
 
 ### 2. Smart PDF Info Extraction
-- **PDF Parsing:** When you upload a PDF to a section, Edgy extracts and summarizes key information.
+- **PDF Parsing:** When you upload a PDF to a section, Learnmate extracts and summarizes key information.
 - **Pinecone Integration:** All extracted info is saved to Pinecone for efficient semantic search and retrieval within each section.
 
 ### 3. Flashcard Generation
@@ -27,7 +27,7 @@ Edgy is a personal project designed to revolutionize how you organize, study, an
 
 1. **Create a Section:** Start by making a new section for your subject or topic.
 2. **Upload Files:** Add PDFs or other files relevant to your section.
-3. **Info Extraction:** Edgy parses and stores summary info from PDFs in Pinecone for semantic search.
+3. **Info Extraction:** Learnmate parses and stores summary info from PDFs in Pinecone for semantic search.
 4. **Flashcard Generation:** Flashcards are created from the contents of your files, and you can begin practicing them.
 5. **Spaced Repetition:** Review flashcards using spaced repetition algorithms for effective learning.
 6. **Ask Questions:** Use the Ask feature to query information about your uploaded files and get instant, content-based answers.
@@ -36,15 +36,15 @@ Edgy is a personal project designed to revolutionize how you organize, study, an
 
 1. **Create section:** "Biology"
 2. **Upload PDFs:** Add lecture notes, textbook chapters, or research papers.
-3. **Flashcards:** Edgy automatically creates flashcards like "What is mitosis?" from your files.
+3. **Flashcards:** Learnmate automatically creates flashcards like "What is mitosis?" from your files.
 4. **Spaced repetition:** Practice daily for long-term retention.
 5. **Ask:** "Explain the process of cellular respiration." Get an answer based on your uploaded PDFs.
 
 ---
 
-# Edgy-Backend
+# Learnmate-Backend
 
-A Node.js backend for Edgy, designed to manage users, sections, flashcards, and file uploads. The backend provides RESTful APIs for user authentication, section management, flashcard generation and review, and integrates with Pinecone for fast, scalable vector search.
+A Node.js backend for Learnmate, designed to manage users, sections, flashcards, and file uploads. The backend provides RESTful APIs for user authentication, section management, flashcard generation and review, and integrates with Pinecone for fast, scalable vector search.
 
 ## Backend Features
 
@@ -100,8 +100,8 @@ A Node.js backend for Edgy, designed to manage users, sections, flashcards, and 
 
 1. **Clone the repo:**
    ```bash
-   git clone https://github.com/anuragk0/Edgy-Backend.git
-   cd Edgy-Backend
+   git clone https://github.com/anuragk0/Learnmate-Backend.git
+   cd Learnmate-Backend
    ```
 
 2. **Install dependencies:**
@@ -131,7 +131,7 @@ A Node.js backend for Edgy, designed to manage users, sections, flashcards, and 
 
 ## Links
 
-- **Frontend:** [Edgy Frontend](https://github.com/anuragk0/Edgy_Frontend)
+- **Frontend:** [Learnmate Frontend](https://github.com/anuragk0/Learnmate_Frontend)
 
 ---
 

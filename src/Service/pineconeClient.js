@@ -4,7 +4,7 @@ const pinecone = new Pinecone({
   apiKey: process.env.PINECONE_API_KEY,
 });
 
-const indexName = 'edgy';
+const indexName = 'Learnmate';
 const getPineconeIndex = () => pinecone.index(indexName);
 
 
