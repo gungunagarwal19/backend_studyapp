@@ -1,11 +1,13 @@
 const bcrypt = require('bcrypt')
+const crypto = require('crypto');
 const User = require('../Model/User')
 const catchAsyncError = require("../../middleware/catchAsyncError");
 const ErrorHandling = require("../../utils/ErrorHandling");
-const { generateOtp, generateToken, sendOtpEmail } = require('../../utils/Otp');
+const { generateOtp, generateToken, sendOtpEmail,sendResetPasswordEmail } = require('../../utils/Otp');
 const SignUp = require('../Model/SignUp')
 const SendToken = require('../../utils/SendToken')
 const jwt = require('jsonwebtoken')
+const { redisConnection } = require('../Service/queue');
 
 const signUp = {
     initiate: catchAsyncError(async (req, res, next) => {
@@ -196,5 +198,156 @@ const getProfile = catchAsyncError(async (req, res, next) => {
     });
 });
 
+const forgotPassword = catchAsyncError(async (req, res, next) => {
 
-module.exports = { signUp, logIn, logout, isAuthenticated, getProfile }
+    const { email } = req.body;
+
+    // 1. Check email
+    if (!email) {
+        return next(
+            new ErrorHandling(400, "Email is required")
+        );
+    }
+
+    // 2. Find user
+    const user = await User.findOne({ email });
+
+    if (!user) {
+        return next(
+            new ErrorHandling(404, "User not found")
+        );
+    }
+
+    // 3. Generate reset token
+    const resetToken = crypto
+        .randomBytes(32)
+        .toString("hex");
+
+    // 4. Store token in Redis for 15 minutes
+    await redisConnection.set(
+        `password-reset:${resetToken}`,
+        user._id.toString(),
+        "EX",
+        900
+    );
+
+    // 5. Create reset URL
+    const resetUrl =
+        `${process.env.CORS_ORIGIN}/reset-password/${resetToken}`;
+
+    // 6. Send reset email
+    try {
+
+        await sendResetPasswordEmail(
+            user.email,
+            resetUrl
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Reset password email error:",
+            error
+        );
+
+        // Remove token if email failed
+        await redisConnection.del(
+            `password-reset:${resetToken}`
+        );
+
+        return next(
+            new ErrorHandling(
+                500,
+                "Failed to send password reset email"
+            )
+        );
+    }
+
+    // 7. Response
+    res.status(200).json({
+        success: true,
+        message:
+            "Password reset link has been sent to your email"
+    });
+});
+
+
+const resetPassword = catchAsyncError(async (req, res, next) => {
+
+    const { token, password, confirmPassword } = req.body;
+
+    // Check token
+    if (!token) {
+        return next(
+            new ErrorHandling(400, "Reset token is required")
+        );
+    }
+
+    // Check passwords
+    if (!password || !confirmPassword) {
+        return next(
+            new ErrorHandling(
+                400,
+                "Password and Confirm Password are required"
+            )
+        );
+    }
+
+    // Check password match
+    if (password !== confirmPassword) {
+        return next(
+            new ErrorHandling(
+                400,
+                "Passwords do not match"
+            )
+        );
+    }
+
+    // Get user ID from Redis
+    const userId = await redisConnection.get(
+        `password-reset:${token}`
+    );
+
+    // Token doesn't exist / expired
+    if (!userId) {
+        return next(
+            new ErrorHandling(
+                400,
+                "Invalid or expired reset token"
+            )
+        );
+    }
+
+    // Find user
+    const user = await User.findById(userId);
+
+    if (!user) {
+        return next(
+            new ErrorHandling(404, "User not found")
+        );
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(
+        password,
+        10
+    );
+
+    // Update password
+    user.password = hashedPassword;
+
+    await user.save();
+
+    // Delete token so it cannot be reused
+    await redisConnection.del(
+        `password-reset:${token}`
+    );
+
+    res.status(200).json({
+        success: true,
+        message: "Password reset successfully"
+    });
+});
+
+
+module.exports = { signUp, logIn, logout, isAuthenticated, getProfile, forgotPassword,forgotPassword,resetPassword }

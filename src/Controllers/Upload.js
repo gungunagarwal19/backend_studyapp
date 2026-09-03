@@ -6,6 +6,7 @@ const OpenAI = require('openai');
 const fs = require('fs');
 const path = require('path');
 const Job = require('../Model/Job');
+const Section = require('../Model/Section');
 const { pdfProcessingQueue } = require('../Service/queue');
 
 const groq = process.env.GROQ_KEY ? new OpenAI({
@@ -76,6 +77,21 @@ const answerQuestion = catchAsyncError(async (req, res, next) => {
     if (!sectionId) {
         return next(new ErrorHandling(400, 'sectionId is required'));
     }
+    const section = await Section.findOne({
+    _id: sectionId,
+    userId: req.user._id
+});
+
+if (!section) {
+    return next(
+        new ErrorHandling(
+            404,
+            'Section not found or not authorized'
+        )
+    );
+}
+
+
     const pineconeIndex = getPineconeIndex();
     const namespace = pineconeIndex.namespace(`${sectionId}`)
 
@@ -88,6 +104,19 @@ const answerQuestion = catchAsyncError(async (req, res, next) => {
     });
 
     const matches = response.result?.hits || [];
+    console.log(
+    "Section:",
+    section.title,
+    "sectionId:",
+    sectionId
+   );
+   console.log(
+    "Pinecone matches:",
+    matches.map(m => ({
+        score: m._score,
+        text: (m.fields?.text || "").substring(0, 100)
+    }))
+   );
     const context = matches.map(m => m.fields?.text || m.text || "").join("\n\n");
 
     if (!matches.length || !context.trim() || context.trim().length < 20) {
@@ -98,13 +127,49 @@ const answerQuestion = catchAsyncError(async (req, res, next) => {
     }
 
 
-    const prompt = `Given the following context, answer the question as accurately as possible.\n\nContext:\n${context}\n\nQuestion: ${question}\n\nAnswer:`;
+const prompt = `
+You are Learnmate, an educational AI assistant.
+
+The user is currently asking a question from this section:
+
+Section: ${section.title}
+
+IMPORTANT RULES:
+
+1. Answer ONLY using the information provided in the context below.
+
+2. The context belongs ONLY to the current section:
+   "${section.title}"
+
+3. DO NOT use knowledge from any other section, subject,
+   previous conversation, or outside source.
+
+4. If the answer cannot be found or reasonably inferred
+   from the provided context, DO NOT guess.
+
+5. If the information is not available in the current section,
+   respond exactly:
+
+"I couldn't find this information in the current section."
+
+6. Do not create facts that are not supported by the context.
+
+7. Give a clear and educational answer based on the context.
+
+CURRENT SECTION CONTENT:
+${context}
+
+USER QUESTION:
+${question}
+
+ANSWER:
+`;
     
     if (groq) {
-        console.log("Generating Q&A answer using Groq (llama-3.3-70b-versatile)...");
+        console.log("Generating Q&A answer using Groq (openai/gpt-oss-120b)...");
         try {
             const completion = await groq.chat.completions.create({
-                model: "llama-3.3-70b-versatile",
+                model: "openai/gpt-oss-120b",
                 messages: [
                     { role: "user", content: prompt }
                 ]
