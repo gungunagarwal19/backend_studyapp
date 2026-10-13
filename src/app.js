@@ -12,7 +12,7 @@ app.use(helmet());
 app.use(cors({
     origin: [
         "http://localhost:5173",
-        "https://frontend-studyapp-six.vercel.app"
+        "https://studyapp-learnmate.vercel.app"
     ],
     credentials: true
 }));

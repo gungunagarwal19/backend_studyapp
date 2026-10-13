@@ -174,18 +174,22 @@ const logout = catchAsyncError(async (req, res, next) => {
 
 const isAuthenticated = catchAsyncError(async (req, res, next) => {
     const token = req.cookies.Learnmate_TOKEN;
+   
     if (!token) {
         return next(new ErrorHandling(401, "Please login to access this resource"));
     }
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        
         const user = await User.findById(decoded.id);
+       
         if (!user) {
             return next(new ErrorHandling(401, "User not found"));
         }
         req.user = user;
         next();
     } catch (error) {
+
         return next(new ErrorHandling(401, "Invalid token. Please login again"));
     }
 });
